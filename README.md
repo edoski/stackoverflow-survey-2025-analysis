@@ -1,4 +1,6 @@
-# ARCHITECTURE.md
+# Stack Overflow 2025 Developer Survey Analysis
+
+A machine learning analysis of Stack Overflow survey data with AI trust classification and compensation regression.
 
 Comprehensive onboarding documentation for the Stack Overflow 2025 Developer Survey Analysis project.
 
@@ -115,7 +117,30 @@ This project satisfies the STAT-PRJ-TRACCIA.pdf requirements:
 - ~8 GB RAM minimum (peak usage during GridSearchCV in classification)
 - ~2 GB free disk space (for dataset and generated plots)
 
-### 2.2 Installation
+### 2.2 Dataset Download
+
+**IMPORTANT**: The dataset file `survey_results_public.csv` (~134 MB) is not included in this repository due to GitHub's file size limits.
+
+Download it from the Stack Overflow Developer Survey on Kaggle:
+
+1. Visit the [Stack Overflow Developer Survey dataset page](https://www.kaggle.com/datasets/stackoverflow/stack-overflow-2025-developer-survey) on Kaggle
+2. Download `survey_results_public.csv`
+3. Place the file in the root directory of this project
+
+Alternatively, if you have the Kaggle CLI installed:
+
+```bash
+kaggle datasets download -d stackoverflow/stack-overflow-2025-developer-survey
+unzip stack-overflow-2025-developer-survey.zip
+```
+
+**Verify the file is present**:
+```bash
+ls -lh survey_results_public.csv
+# Expected: ~134 MB file
+```
+
+### 2.3 Installation
 
 ```bash
 # Clone or download the repository
@@ -123,13 +148,9 @@ cd stackoverflow-survey-2025-analysis
 
 # Install dependencies
 pip install pandas numpy matplotlib seaborn scikit-learn statsmodels scipy
-
-# Verify survey data is present
-ls -lh survey_results_public.csv
-# Expected: ~88 MB file
 ```
 
-### 2.3 Execution Order
+### 2.4 Execution Order
 
 Run scripts in this order to reproduce the complete analysis:
 
