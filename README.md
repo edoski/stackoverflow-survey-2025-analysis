@@ -39,11 +39,13 @@ This is an **academic statistical analysis project** for the STAT-PRJ-TRACCIA.pd
 ### 1.2 Dataset
 
 **Source**: Stack Overflow 2025 Developer Survey (`survey_results_public.csv`)
+
 - **Size**: ~88 MB CSV file
 - **Rows**: ~90,000 survey responses from developers worldwide
 - **Columns**: ~100+ survey questions covering demographics, employment, compensation, AI attitudes, and more
 
 **Key columns used**:
+
 - Classification: `AIAcc`, `WorkExp`, `YearsCode`, `Age`, `EdLevel`, `Industry`, `Employment`, `RemoteWork`, `OrgSize`, `ICorPM`, `DevType`, `AISelect`, `AIAgents`, `AIModelsChoice`
 - Regression: `Currency`, `WorkExp`, `CompTotal`, `Country`, `Employment`, `EdLevel`, `Industry`
 
@@ -54,12 +56,14 @@ This is an **academic statistical analysis project** for the STAT-PRJ-TRACCIA.pd
 **Objective**: Predict whether a developer trusts or distrusts AI tools
 
 **Target variable**: `AIAccBin`
+
 - 1 = Trust (Highly trust OR Somewhat trust)
 - 0 = Distrust (Highly distrust OR Somewhat distrust)
 
 **Class distribution**: ~40% distrust, ~60% trust (moderate imbalance)
 
 **Models compared**:
+
 1. Logistic Regression (baseline)
 2. SVM with linear kernel
 3. SVM with polynomial kernel
@@ -76,6 +80,7 @@ This is an **academic statistical analysis project** for the STAT-PRJ-TRACCIA.pd
 **Target**: `CompTotal` (annual compensation in EUR)
 
 **Analysis includes**:
+
 - Overall regression on EUR subset
 - Per-country analysis for top 5 countries by sample size
 - Diagnostic plots (residuals, QQ-plot)
@@ -86,6 +91,7 @@ This is an **academic statistical analysis project** for the STAT-PRJ-TRACCIA.pd
 **Language**: Python 3.12+
 
 **Core libraries**:
+
 - `pandas` (1.5+): Data manipulation and CSV loading
 - `numpy` (1.23+): Numerical operations
 - `scikit-learn` (1.2+): Machine learning models, pipelines, cross-validation
@@ -135,6 +141,7 @@ unzip stack-overflow-2025-developer-survey.zip
 ```
 
 **Verify the file is present**:
+
 ```bash
 ls -lh survey_results_public.csv
 # Expected: ~134 MB file
@@ -166,6 +173,7 @@ python regressione_lineare.py
 ```
 
 **Expected runtime**:
+
 - `eda.py`: 1-2 minutes
 - `classification.py`: 5-10 minutes (GridSearchCV is compute-intensive)
 - `regressione_lineare.py`: 1-2 minutes
@@ -204,6 +212,7 @@ stackoverflow-survey-2025-analysis/
 Check console output for key metrics:
 
 **Classification** (`classification.py`):
+
 ```
 Miglior modello su validation: logistic (acc=0.733)
 Accuratezza su test: 0.743
@@ -218,6 +227,7 @@ Intervallo di Confidenza al 95%: [0.724, 0.738]
 ```
 
 **Regression** (`regressione_lineare.py`):
+
 ```
 === Training Set Metrics ===
 R^2 = 0.043
@@ -354,6 +364,7 @@ AGE_MAP: Dict[str, int] = {
 ```
 
 **Why midpoints?**
+
 - Preserves ordinal relationship (younger → older)
 - Converts categorical to numeric for StandardScaler in pipeline
 - Reasonable approximation: 25-34 range has midpoint 30
@@ -376,6 +387,7 @@ ED_MAP: Dict[str, int] = {
 ```
 
 **Why ordinal 1-7?**
+
 - Captures natural progression of education levels
 - Treats education as ordinal (not nominal) for modeling
 - "Other" mapped to 3 (mid-low level) as conservative estimate
@@ -437,6 +449,7 @@ DEFAULT_TOP_N_CATEGORIES = 10   # Default number of top categories to keep
 ```
 
 **Why these values?**
+
 - 60 years: Reasonable max for someone who started at 18 and is now 78
 - 1.5 × IQR: Standard Tukey outlier detection method
 - Top 10: Balances informativeness vs. sparsity in one-hot encoding
@@ -468,6 +481,7 @@ if len(df) == 0:
 ```
 
 **Why validate inputs?**
+
 - Fail fast with helpful error messages
 - Prevents cryptic errors deep in processing
 - Documents expected input schema
@@ -482,6 +496,7 @@ print(f"[preprocess_eur] Filtered to EUR currency: {len(df)} rows")
 **Example output**: `[preprocess_eur] Filtered to EUR currency: 9614 rows`
 
 **Why EUR only?**
+
 - Regression compares salaries; must use same currency
 - EUR subset has good sample size across multiple countries
 - Avoids currency conversion complexities
@@ -509,6 +524,7 @@ for c in numeric_cols:
 ```
 
 **Example output**:
+
 ```
 [preprocess_eur] Starting with 9614 rows
   WorkExp: 12 values coerced to NaN (non-numeric)
@@ -516,6 +532,7 @@ for c in numeric_cols:
 ```
 
 **Why log coercion?**
+
 - Transparency: user knows how many values were invalid
 - Data quality check: too many coercions indicate data issues
 - Reproducibility: logs are part of analysis documentation
@@ -529,7 +546,7 @@ dropped_na = before_dropna - len(df)
 print(f"  Dropped {dropped_na} rows with NaN in numeric columns")
 ```
 
-**Example output**: `  Dropped 2746 rows with NaN in numeric columns`
+**Example output**: `Dropped 2746 rows with NaN in numeric columns`
 
 **Step 6: Plausibility bounds** (lines 67-71)
 
@@ -541,9 +558,10 @@ dropped_bounds = before_bounds - len(df)
 print(f"  Dropped {dropped_bounds} rows outside plausibility bounds")
 ```
 
-**Example output**: `  Dropped 90 rows outside plausibility bounds`
+**Example output**: `Dropped 90 rows outside plausibility bounds`
 
 **Why these bounds?**
+
 - WorkExp > 0: Zero experience doesn't make sense for compensation analysis
 - WorkExp ≤ 60: Removes implausible values (typos, data entry errors)
 - CompTotal > 0: Removes zero/negative salaries (unpaid internships, errors)
@@ -561,9 +579,10 @@ dropped_outliers = before_iqr - len(df)
 print(f"  Dropped {dropped_outliers} high outliers (IQR method)")
 ```
 
-**Example output**: `  Dropped 293 high outliers (IQR method)`
+**Example output**: `Dropped 293 high outliers (IQR method)`
 
 **Why only high outliers?**
+
 - High salaries are often data entry errors or extreme CEOs
 - Low salaries may be legitimate (part-time, junior, low-cost countries)
 - Tukey's 1.5×IQR method is standard for outlier detection
@@ -577,7 +596,7 @@ dropped_dups = before_dedup - len(df)
 print(f"  Dropped {dropped_dups} duplicate rows")
 ```
 
-**Example output**: `  Dropped 178 duplicate rows`
+**Example output**: `Dropped 178 duplicate rows`
 
 **Step 9: Output validation and final log** (lines 87-91)
 
@@ -594,10 +613,12 @@ return df
 **Example output**: `[preprocess_eur] Final dataset: 6307 rows`
 
 **Why validate output?**
+
 - Prevents downstream errors if all data was filtered out
 - Helpful error message guides user to relax filtering
 
 **Complete example output**:
+
 ```
 [preprocess_eur] Filtered to EUR currency: 9614 rows
 [preprocess_eur] Starting with 9614 rows
@@ -658,11 +679,13 @@ print(f"[preprocess_aiaccbin] Filtered to trust/distrust responses: {len(df)} ro
 **Example output**: `[preprocess_aiaccbin] Filtered to trust/distrust responses: 26109 rows`
 
 **Why binary?**
+
 - Original AIAcc has 4 levels: Highly trust, Somewhat trust, Somewhat distrust, Highly distrust
 - Binary simplifies to trust (1) vs. distrust (0)
 - Easier to model and interpret than ordinal 4-class
 
 **Class distribution**:
+
 - Distrust (0): ~40%
 - Trust (1): ~60%
 - Moderate imbalance handled by `class_weight="balanced"` in models
@@ -686,6 +709,7 @@ print(f"  Dropped {dropped_na} rows with NaN in WorkExp/YearsCode")
 ```
 
 **Example output**:
+
 ```
 [preprocess_aiaccbin] Starting numeric conversion
   WorkExp: 8 values coerced to NaN
@@ -703,9 +727,10 @@ dropped_bounds = before_bounds - len(df)
 print(f"  Dropped {dropped_bounds} rows outside plausibility bounds")
 ```
 
-**Example output**: `  Dropped 37 rows outside plausibility bounds`
+**Example output**: `Dropped 37 rows outside plausibility bounds`
 
 **Why YearsCode ≥ 0?**
+
 - WorkExp > 0: Must have some professional experience
 - YearsCode ≥ 0: Can be zero (just started coding) but not negative
 
@@ -720,9 +745,10 @@ dropped_mapping = before_mapping - len(df)
 print(f"  Dropped {dropped_mapping} rows with unmapped Age/EdLevel")
 ```
 
-**Example output**: `  Dropped 108 rows with unmapped Age/EdLevel`
+**Example output**: `Dropped 108 rows with unmapped Age/EdLevel`
 
 **Why drop unmapped?**
+
 - `AGE_MAP` and `ED_MAP` don't cover all possible survey values
 - Unmapped values become NaN
 - Better to drop than impute (preserves data quality)
@@ -739,6 +765,7 @@ if "DevType" in df.columns:
 ```
 
 **Why top-N + "Other"?**
+
 - Original `Industry` and `DevType` have 50+ unique values
 - One-hot encoding would create 50+ sparse features
 - Top 10 captures most common categories, groups rest as "Other"
@@ -755,7 +782,7 @@ dropped_dups = before_dedup - len(df)
 print(f"  Dropped {dropped_dups} duplicate rows")
 ```
 
-**Example output**: `  Dropped 5012 duplicate rows`
+**Example output**: `Dropped 5012 duplicate rows`
 
 **Step 8: Output validation and final log** (lines 170-176)
 
@@ -772,6 +799,7 @@ return df
 **Example output**: `[preprocess_aiaccbin] Final dataset: 18821 rows`
 
 **Complete example output**:
+
 ```
 [preprocess_aiaccbin] Filtered to trust/distrust responses: 26109 rows
 [preprocess_aiaccbin] Starting numeric conversion
@@ -844,6 +872,7 @@ from preprocessing import preprocess_aiaccbin
 ```
 
 **Key imports**:
+
 - `scipy.stats`: For t-distribution (confidence intervals)
 - `sklearn.base.clone`: For creating independent model instances
 - `sklearn.compose.ColumnTransformer`: For separate numeric/categorical preprocessing
@@ -867,6 +896,7 @@ HISTOGRAM_BINS = 10
 ```
 
 **Why these values?**
+
 - 70/15/15 split: Common for medium datasets; enough data for validation and test
 - `LOGISTIC_MAX_ITER=1000`: Ensures convergence (default 100 may be too low)
 - `CONFIDENCE_LEVEL=0.975`: Two-tailed 95% CI (α=0.05, α/2=0.025 per tail)
@@ -893,20 +923,24 @@ def build_preprocessor(
 ```
 
 **Why ColumnTransformer?**
+
 - Applies StandardScaler to numeric features only
 - Applies OneHotEncoder to categorical features only
 - Prevents mixing: numeric features stay numeric, categorical stay categorical
 
 **Why handle_unknown="ignore"?**
+
 - If test set has new category value not in training, don't crash
 - Create all-zeros encoding for unknown category
 - Robust to data drift
 
 **Why sparse_output=False?**
+
 - Dense arrays are easier to debug
 - Slight memory overhead acceptable for this dataset size
 
 **CRITICAL: Why function instead of constant?**
+
 ```python
 # WRONG - Data leakage!
 preprocessor = build_preprocessor(numeric, categorical)
@@ -955,6 +989,7 @@ def load_clean_df(path: str) -> pd.DataFrame:
 ```
 
 **Why usecols?**
+
 - Survey CSV has 100+ columns; only load what we need
 - Reduces memory usage (88 MB → ~20 MB loaded)
 - Faster CSV parsing
@@ -991,6 +1026,7 @@ def plot_confusion(cm: np.ndarray, outdir: Path) -> None:
 ```
 
 **Confusion matrix format**:
+
 ```
               Predicted
               0      1
@@ -1035,11 +1071,13 @@ X_val, X_test, y_val, y_test = train_test_split(
 ```
 
 **Final split**:
+
 - Training: 13,175 rows (70%)
 - Validation: 2,823 rows (15%)
 - Test: 2,823 rows (15%)
 
 **Why stratified?**
+
 - Preserves 40:60 class distribution in all splits
 - Prevents train having all distrust, test having all trust
 - Critical for imbalanced datasets
@@ -1062,6 +1100,7 @@ categorical = [
 ```
 
 **Why these features?**
+
 - Numeric: Continuous or ordinal features (scaled)
 - Categorical: Nominal features (one-hot encoded)
 - Domain knowledge: AI usage features (AISelect, AIAgents, AIModelsChoice) likely predictive
@@ -1092,11 +1131,13 @@ candidates = {
 **Critical**: Each pipeline gets its own `build_preprocessor()` call to prevent data leakage.
 
 **Why class_weight="balanced"?**
+
 - Handles 40:60 imbalance
 - Equivalent to: `class_weight={0: 1.5, 1: 1.0}` (approximately)
 - Prevents model from always predicting majority class
 
 **Why gamma="scale"?**
+
 - Default for SVM with RBF/poly kernels
 - `gamma = 1 / (n_features * X.var())`
 - Auto-adjusts to feature scale
@@ -1114,6 +1155,7 @@ for name, pipe in candidates.items():
 ```
 
 **Example output**:
+
 ```
 Accuratezza baseline su validation:
   logistic: 0.733
@@ -1148,6 +1190,7 @@ for name in ["svm_linear", "svm_poly", "svm_rbf"]:
 ```
 
 **Example output**:
+
 ```
   svm_linear (ottimizzato) val_acc: 0.721  best_params: {'clf__C': 0.1}
   svm_poly (ottimizzato) val_acc: 0.728  best_params: {'clf__C': 0.1, 'clf__degree': 2, 'clf__gamma': 'scale'}
@@ -1155,11 +1198,13 @@ for name in ["svm_linear", "svm_poly", "svm_rbf"]:
 ```
 
 **Why GridSearchCV on training only?**
+
 - 5-fold CV uses only training set (13,175 rows)
 - Validation set untouched during tuning
 - Prevents overfitting to validation
 
 **Why not tune logistic regression?**
+
 - Logistic is baseline; simpler model
 - Fewer hyperparameters to tune (mainly C and max_iter)
 - Focus tuning effort on SVMs (more hyperparameters)
@@ -1186,6 +1231,7 @@ print(f"\nMiglior modello su validation: {best_name} (acc={best_acc:.3f})")
 **Example output**: `Miglior modello su validation: logistic (acc=0.733)`
 
 **Why validation for selection?**
+
 - Test set must remain untouched until final evaluation
 - Validation set is for model selection
 - Prevents "peeking" at test performance
@@ -1212,11 +1258,13 @@ plot_confusion(cm, outdir)
 **Example output**: `Accuratezza su test: 0.743`
 
 **Why refit on train+val?**
+
 - More training data → better final model
 - Validation set no longer needed for selection
 - Common practice in ML: use all available data for final model
 
 **Test accuracy > validation accuracy?**
+
 - 0.743 > 0.733: Good generalization!
 - Not overfitting to training data
 - Lucky split (test set slightly easier)
@@ -1266,6 +1314,7 @@ print(f"Intervallo di Confidenza al 95%: [{mean_kr - half_kr:.3f}, {mean_kr + ha
 ```
 
 **Example output**:
+
 ```
 === Studio Statistico 1: K Independent Runs ===
 K Independent Runs (PDF requirement):
@@ -1279,17 +1328,20 @@ Intervallo di Confidenza al 95%: [0.728, 0.734]
 ```
 
 **What is K-Independent Runs?**
+
 - Run k=10 independent train/test splits
 - Each split uses different random seed (`random_seed + i + 100`)
 - Each split is 80% train, 20% test (from train+val)
 - Captures variability from data randomness
 
 **Why clone?**
+
 - `clone(best_pipe)` creates fresh instance of pipeline
 - Prevents refitting same instance k times
 - Each run is independent
 
 **Why t-distribution?**
+
 - k=10 is small sample size
 - t-distribution has heavier tails than normal
 - More conservative CI (wider intervals)
@@ -1328,6 +1380,7 @@ print(f"Intervallo di Confidenza al 95%: [{mean_cv - half_cv:.3f}, {mean_cv + ha
 ```
 
 **Example output**:
+
 ```
 === Studio Statistico 2: K-Fold Cross-Validation ===
 K-Fold Cross-Validation:
@@ -1341,18 +1394,21 @@ Intervallo di Confidenza al 95%: [0.724, 0.738]
 ```
 
 **What is K-Fold CV?**
+
 - Standard ML validation method
 - Splits data into k=10 folds
 - Each fold is test set once; other 9 are training
 - Reports 10 accuracy scores
 
 **Difference from K-Independent Runs?**
+
 - K-fold: Same data, 10 different test folds
 - K-independent: 10 different random splits
 - K-fold: More variance (0.011 vs 0.005)
 - Both methods complementary
 
 **Why both?**
+
 - PDF requirement: K-independent runs
 - ML best practice: K-fold CV
 - Shows robustness across different validation methods
@@ -1394,12 +1450,14 @@ plt.close(fig)
 ```
 
 **Outputs**:
+
 - `plots_classification/confusion_matrix.png`: Test set confusion matrix
 - `plots_classification/cv_hist.png`: Histogram of 10 independent run accuracies
 - `plots_classification/cv_scatter.png`: Scatter of 10 accuracies vs. run index
 - `plots_classification/cv_box.png`: Boxplot of 10 accuracies
 
 **Why visualize?**
+
 - Histogram: Shows distribution shape (normal? skewed?)
 - Scatter: Shows run-to-run variability
 - Boxplot: Shows median, IQR, outliers
@@ -1451,6 +1509,7 @@ from preprocessing import preprocess_eur
 ```
 
 **Key imports**:
+
 - `statsmodels.api`: For QQ-plot (`sm.ProbPlot`)
 - `scipy.stats.shapiro`: For normality test on residuals
 - `sklearn.linear_model.LinearRegression`: Simple OLS regression
@@ -1495,6 +1554,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 ```
 
 **Split sizes**:
+
 - Training: 5,046 rows (80%)
 - Test: 1,261 rows (20%)
 
@@ -1523,6 +1583,7 @@ print(f"RMSE = {rmse_train:.1f}")
 ```
 
 **Example output**:
+
 ```
 === Training Set Metrics ===
 R^2 = 0.043
@@ -1531,6 +1592,7 @@ RMSE = 28447.2
 ```
 
 **Interpretation**:
+
 - R² = 0.043: WorkExp explains only 4.3% of variance in CompTotal
 - RMSE ≈ 28,447 EUR: Large prediction error
 - Weak relationship (high residual variance)
@@ -1552,6 +1614,7 @@ print(f"Intercept = {lr.intercept_:.2f}  |  Slope = {lr.coef_[0]:.2f}  (EUR per 
 ```
 
 **Example output**:
+
 ```
 === Test Set Metrics (Generalization) ===
 R^2 = 0.038
@@ -1561,6 +1624,7 @@ Intercept = 45218.73  |  Slope = 832.47  (EUR per anno)
 ```
 
 **Interpretation**:
+
 - R² (test) ≈ R² (train): Good generalization (not overfitting)
 - Intercept ≈ 45,219 EUR: Base salary for 0 years experience
 - Slope ≈ 832 EUR/year: Each year of experience → +832 EUR salary
@@ -1584,6 +1648,7 @@ plt.close()
 **Output**: `plots_regression/scatter_fit_WorkExp_CompTotal.png`
 
 **Why plot full data but train on 80%?**
+
 - Model fitted on training only (no leakage)
 - Visualization uses full data for better coverage
 - Title shows test R² for honesty
@@ -1639,6 +1704,7 @@ for country in top_countries:
 ```
 
 **Example output**:
+
 ```
 [Germany] n=1842 R^2=0.068 RMSE=26543.2 Intercept=48231.15 Slope=1203.47
 [France] n=891 R^2=0.034 RMSE=22187.3 Intercept=43127.89 Slope=672.31
@@ -1648,11 +1714,13 @@ for country in top_countries:
 ```
 
 **Observations**:
+
 - Germany: Highest slope (1,203 EUR/year) and R²
 - Spain/Italy: Lower salaries, weaker relationship
 - Country-specific patterns visible
 
 **Why per-country IQR?**
+
 - Global IQR may not fit all countries
 - Germany has higher salaries → higher outlier threshold
 - Spain has lower salaries → lower outlier threshold
@@ -1677,6 +1745,7 @@ plt.close(fig)
 **Output**: `plots_regression/residuals_vs_fitted_eur.png`
 
 **What to look for**:
+
 - Horizontal band around 0: Good (homoscedasticity)
 - Funnel shape: Bad (heteroscedasticity)
 - Patterns: Bad (non-linearity)
@@ -1698,6 +1767,7 @@ print("Note: Shapiro-Wilk test is sensitive to sample size; large samples may re
 ```
 
 **Example output**:
+
 ```
 === Shapiro-Wilk Test for Normality of Residuals ===
 Statistic: 0.9823
@@ -1707,6 +1777,7 @@ Note: Shapiro-Wilk test is sensitive to sample size; large samples may reject no
 ```
 
 **Interpretation**:
+
 - H0: Residuals are normally distributed
 - p < 0.05: Reject H0 (residuals not normal)
 - Caveat: Large sample (n=5,046) is very sensitive to minor deviations
@@ -1726,6 +1797,7 @@ plt.close(fig)
 **Output**: `plots_regression/qq_residuals_eur.png`
 
 **What to look for**:
+
 - Points on diagonal: Normal residuals
 - S-shape: Heavy tails (not normal)
 - J-shape: Skewed residuals
@@ -1827,6 +1899,7 @@ plt.close(fig)
 ```
 
 **Outputs**:
+
 - `plots_eda/eur/box_CompTotal.png`: Boxplot shows median, IQR, outliers
 - `plots_eda/eur/hist_WorkExp.png`: Right-skewed distribution
 - `plots_eda/eur/hist_CompTotal.png`: Right-skewed distribution
@@ -1895,6 +1968,7 @@ plt.close(fig)
 ```
 
 **Outputs**:
+
 - `plots_eda/aiaccbin/distribuzione_AIAccBin.png`: Bar chart showing 40:60 imbalance
 - `plots_eda/aiaccbin/hist_WorkExp.png`: Right-skewed
 - `plots_eda/aiaccbin/hist_YearsCode.png`: Right-skewed
@@ -1913,6 +1987,7 @@ plt.close(fig)
 **Input**: 26,109 rows (survey responses with trust/distrust answers)
 
 **Preprocessing steps and data loss**:
+
 1. Filter to EUR currency: 26,109 rows (no loss, different filter)
 2. NaN in WorkExp/YearsCode: -2,131 rows → 23,978 rows
 3. Outside plausibility bounds: -37 rows → 23,941 rows
@@ -1922,12 +1997,14 @@ plt.close(fig)
 **Final dataset**: 18,821 rows (28% data loss)
 
 **Data loss breakdown**:
+
 - NaN removal: 8.2%
 - Plausibility: 0.1%
 - Mapping: 0.4%
 - Duplicates: 19.2% (largest loss)
 
 **Class distribution**:
+
 - Distrust (0): 7,528 rows (40%)
 - Trust (1): 11,293 rows (60%)
 - Imbalance ratio: 1.5:1 (moderate)
@@ -1935,6 +2012,7 @@ plt.close(fig)
 #### 5.1.2 Train/Val/Test Split
 
 **Split sizes**:
+
 - Training: 13,175 rows (70%)
 - Validation: 2,823 rows (15%)
 - Test: 2,823 rows (15%)
@@ -1963,6 +2041,7 @@ plt.close(fig)
 **Best model**: Logistic Regression (baseline, 0.733 validation accuracy)
 
 **Observations**:
+
 - Logistic Regression wins (simplest model)
 - Tuning SVMs didn't improve over baseline
 - Lower C (0.1) performed better for linear/poly (more regularization)
@@ -1986,18 +2065,21 @@ Actual  0   [742]  [386]    (Distrust: 1,128 samples)
 ```
 
 **Metrics from confusion matrix**:
+
 - **True Negatives (TN)**: 742 (correctly predicted distrust)
 - **False Positives (FP)**: 386 (predicted trust, actually distrust)
 - **False Negatives (FN)**: 340 (predicted distrust, actually trust)
 - **True Positives (TP)**: 1,355 (correctly predicted trust)
 
 **Derived metrics**:
+
 - **Precision (trust)**: TP / (TP + FP) = 1,355 / (1,355 + 386) = 0.778
 - **Recall (trust)**: TP / (TP + FN) = 1,355 / (1,355 + 340) = 0.799
 - **Precision (distrust)**: TN / (TN + FN) = 742 / (742 + 340) = 0.686
 - **Recall (distrust)**: TN / (TN + FP) = 742 / (742 + 386) = 0.658
 
 **Interpretation**:
+
 - Model better at predicting trust (majority class)
 - Distrust precision/recall lower (minority class)
 - Overall balanced performance for imbalanced dataset
@@ -2029,6 +2111,7 @@ Actual  0   [742]  [386]    (Distrust: 1,128 samples)
 | **95% CI** | **[0.724, 0.738]** |
 
 **Comparison**:
+
 - Both methods: ~73.1% mean accuracy
 - K-fold CV: Higher variance (0.011 vs 0.005)
 - K-fold CV: Wider CI ([0.724, 0.738] vs [0.728, 0.734])
@@ -2036,6 +2119,7 @@ Actual  0   [742]  [386]    (Distrust: 1,128 samples)
 - Test accuracy (0.743) within both CIs
 
 **Interpretation**:
+
 - Model is stable across different data splits
 - No overfitting (test ≈ CV)
 - Confidence intervals confirm ~73% accuracy is robust
@@ -2048,6 +2132,7 @@ Actual  0   [742]  [386]    (Distrust: 1,128 samples)
 **Input**: 9,614 rows (EUR currency filter from ~90,000 total)
 
 **Preprocessing steps and data loss**:
+
 1. EUR currency filter: 9,614 rows
 2. NaN in WorkExp/CompTotal: -2,746 rows → 6,868 rows
 3. Outside plausibility bounds: -90 rows → 6,778 rows
@@ -2057,6 +2142,7 @@ Actual  0   [742]  [386]    (Distrust: 1,128 samples)
 **Final dataset**: 6,307 rows (34% data loss from EUR subset)
 
 **Data loss breakdown**:
+
 - NaN removal: 28.6%
 - Plausibility: 0.9%
 - IQR outliers: 3.1%
@@ -2065,6 +2151,7 @@ Actual  0   [742]  [386]    (Distrust: 1,128 samples)
 #### 5.2.2 Train/Test Split
 
 **Split sizes**:
+
 - Training: 5,046 rows (80%)
 - Test: 1,261 rows (20%)
 
@@ -2073,20 +2160,24 @@ Actual  0   [742]  [386]    (Distrust: 1,128 samples)
 #### 5.2.3 Overall Model Results
 
 **Training set**:
+
 - R² = 0.043
 - MSE = 809,184,724
 - RMSE = 28,447 EUR
 
 **Test set (generalization)**:
+
 - R² = 0.038
 - MSE = 835,115,267
 - RMSE = 28,891 EUR
 
 **Coefficients**:
+
 - Intercept = 45,219 EUR (base salary for 0 years experience)
 - Slope = 832 EUR/year (salary increase per year of experience)
 
 **Interpretation**:
+
 - **Very weak relationship**: R² = 0.038 (WorkExp explains only 3.8% of variance)
 - **Large prediction error**: RMSE ≈ 29,000 EUR (huge for salary prediction)
 - **Positive trend**: +832 EUR/year is statistically positive but practically small
@@ -2107,6 +2198,7 @@ Actual  0   [742]  [386]    (Distrust: 1,128 samples)
 | Spain | 412 | 0.012 | 15,679 | 32,146 | 299 |
 
 **Observations**:
+
 - **Germany**: Strongest relationship (R²=0.068), highest slope (1,203 EUR/year)
 - **Netherlands**: Highest base salary (52,342 EUR), moderate slope
 - **Spain/Italy**: Lowest salaries, weakest relationship
@@ -2114,6 +2206,7 @@ Actual  0   [742]  [386]    (Distrust: 1,128 samples)
 - **Slope variation**: 299-1,203 EUR/year (4x difference)
 
 **Interpretation**:
+
 - Salary structures differ by country
 - Experience matters more in Germany than Spain
 - Base salary varies widely (32k-52k EUR)
@@ -2121,6 +2214,7 @@ Actual  0   [742]  [386]    (Distrust: 1,128 samples)
 #### 5.2.5 Diagnostic Results
 
 **Shapiro-Wilk normality test** (residuals):
+
 - Statistic: 0.9823
 - P-value: < 0.0001
 - Conclusion: Reject H0 (residuals NOT normally distributed)
@@ -2128,16 +2222,19 @@ Actual  0   [742]  [386]    (Distrust: 1,128 samples)
 **Caveat**: Large sample (n=5,046) is very sensitive; minor deviations trigger rejection
 
 **Visual diagnostics**:
+
 - **Residuals vs Fitted**: Likely shows funnel pattern (heteroscedasticity)
 - **QQ-plot**: Likely shows light S-shape (heavy tails, but close to normal)
 
 **Interpretation**:
+
 - Residuals have some non-normality (heavy tails)
 - Heteroscedasticity present (variance increases with salary)
 - OLS assumptions partially violated
 - Predictions less reliable at high salaries
 
 **Recommendations**:
+
 - Log-transform CompTotal to reduce skewness
 - Use robust standard errors (HC3)
 - Add more predictors (role, skills, company size)
@@ -2145,11 +2242,13 @@ Actual  0   [742]  [386]    (Distrust: 1,128 samples)
 ### 5.3 EDA Outputs
 
 **EUR subset** (regression):
+
 - 4 plots in `plots_eda/eur/`
 - Key insight: CompTotal is right-skewed with outliers
 - Correlation (WorkExp, CompTotal) ≈ 0.2 (weak positive)
 
 **AIAccBin subset** (classification):
+
 - 6 plots in `plots_eda/aiaccbin/`
 - Key insight: 40:60 class imbalance, WorkExp/YearsCode right-skewed
 - Employment type shows signal (some types have higher trust proportion)
@@ -2165,6 +2264,7 @@ This codebase implements 50+ improvements across professional Python practices:
 ### 6.1 Type Hints (100% coverage)
 
 **All functions have type hints**:
+
 ```python
 def preprocess_eur(df: pd.DataFrame) -> pd.DataFrame:
 def build_preprocessor(numeric: List[str], categorical: List[str]) -> ColumnTransformer:
@@ -2172,6 +2272,7 @@ def main() -> None:
 ```
 
 **Benefits**:
+
 - IDE autocomplete and error detection
 - Self-documenting function signatures
 - Static analysis with mypy (if needed)
@@ -2180,6 +2281,7 @@ def main() -> None:
 ### 6.2 Module Docstrings (all 5 files)
 
 **Every file starts with comprehensive docstring**:
+
 ```python
 """
 Binary classification of AI trust/distrust in Stack Overflow survey data.
@@ -2189,6 +2291,7 @@ Implements logistic regression and SVM models...
 ```
 
 **Benefits**:
+
 - Clear purpose and scope
 - High-level workflow summary
 - Helps new developers understand module role
@@ -2196,6 +2299,7 @@ Implements logistic regression and SVM models...
 ### 6.3 Input Validation
 
 **Both preprocessing functions validate inputs**:
+
 ```python
 if not isinstance(df, pd.DataFrame):
     raise TypeError(f"Expected pd.DataFrame, got {type(df).__name__}")
@@ -2210,6 +2314,7 @@ if len(df) == 0:
 ```
 
 **Benefits**:
+
 - Fail fast with helpful error messages
 - Prevents cryptic errors downstream
 - Documents expected input schema
@@ -2217,12 +2322,14 @@ if len(df) == 0:
 ### 6.4 Output Validation
 
 **Functions ensure non-empty results**:
+
 ```python
 if len(df) == 0:
     raise ValueError("Preprocessing resulted in empty DataFrame. Try less strict filtering.")
 ```
 
 **Benefits**:
+
 - Catches edge cases (e.g., all data filtered out)
 - Helpful error message guides user to fix
 - Prevents silent failures
@@ -2230,6 +2337,7 @@ if len(df) == 0:
 ### 6.5 Named Constants
 
 **All magic numbers extracted to module-level constants**:
+
 ```python
 MAX_WORK_EXPERIENCE_YEARS = 60
 IQR_MULTIPLIER = 1.5
@@ -2238,6 +2346,7 @@ CONFIDENCE_LEVEL = 0.975
 ```
 
 **Benefits**:
+
 - Single source of truth for parameters
 - Easy to modify without hunting through code
 - Self-documenting intent
@@ -2245,6 +2354,7 @@ CONFIDENCE_LEVEL = 0.975
 ### 6.6 Comprehensive Logging
 
 **Data loss transparently logged at every step**:
+
 ```python
 before_dropna = len(df)
 df = df.dropna(subset=numeric_cols)
@@ -2253,6 +2363,7 @@ print(f"  Dropped {dropped_na} rows with NaN in numeric columns")
 ```
 
 **Example output**:
+
 ```
 [preprocess_eur] Starting with 9614 rows
   Dropped 2746 rows with NaN in numeric columns
@@ -2263,6 +2374,7 @@ print(f"  Dropped {dropped_na} rows with NaN in numeric columns")
 ```
 
 **Benefits**:
+
 - Transparency: user knows exactly what happened
 - Data quality check: spot suspicious patterns
 - Reproducibility: logs are documentation
@@ -2270,12 +2382,14 @@ print(f"  Dropped {dropped_na} rows with NaN in numeric columns")
 ### 6.7 Error Handling
 
 **Informative error messages**:
+
 ```python
 raise ValueError(f"industry_top_n must be >= 1, got {industry_top_n}")
 raise ValueError(f"Missing required columns: {missing}")
 ```
 
 **Benefits**:
+
 - Guides user to fix issue
 - No cryptic "KeyError: 'Currency'"
 - Saves debugging time
@@ -2283,6 +2397,7 @@ raise ValueError(f"Missing required columns: {missing}")
 ### 6.8 No Data Leakage
 
 **Each ML pipeline gets independent preprocessor**:
+
 ```python
 candidates = {
     "logistic": Pipeline([("prep", build_preprocessor(numeric, categorical)), ...]),
@@ -2291,6 +2406,7 @@ candidates = {
 ```
 
 **Benefits**:
+
 - Prevents information leakage between models
 - Each model's preprocessor fitted only on its training data
 - Correct ML practice
@@ -2298,12 +2414,14 @@ candidates = {
 ### 6.9 Statistical Rigor
 
 **Uses t-distribution (not z-distribution) for CIs**:
+
 ```python
 t_crit = stats.t.ppf(CONFIDENCE_LEVEL, df=len(scores)-1)
 half_width = t_crit * std / np.sqrt(len(scores))
 ```
 
 **Benefits**:
+
 - More accurate for small samples (k=10)
 - Wider CIs (more conservative)
 - Statistically correct
@@ -2326,6 +2444,7 @@ half_width = t_crit * std / np.sqrt(len(scores))
 **Problem**: Fitting preprocessor on full data leaks information from test to training
 
 **Solution**: Preprocessing in scikit-learn Pipelines
+
 ```python
 pipe = Pipeline([
     ("prep", ColumnTransformer([...])),  # Fitted only on training data
@@ -2339,11 +2458,13 @@ pipe.fit(X_train, y_train)  # Preprocessor sees only training data
 ### 7.2 Train/Validation/Test Discipline
 
 **Classification**: 70/15/15 split
+
 - Training: Fit baseline models, run GridSearchCV
 - Validation: Select best model
 - Test: Final evaluation (once!)
 
 **Regression**: 80/20 split
+
 - Training: Fit LinearRegression
 - Test: Generalization check (once!)
 
@@ -2352,11 +2473,13 @@ pipe.fit(X_train, y_train)  # Preprocessor sees only training data
 ### 7.3 Stratified Splitting
 
 **Classification only**:
+
 ```python
 train_test_split(X, y, stratify=y, random_state=42)
 ```
 
 **Benefits**:
+
 - Preserves 40:60 class distribution in all splits
 - Prevents train having 50:50, test having 30:70
 - Critical for imbalanced datasets
@@ -2364,12 +2487,14 @@ train_test_split(X, y, stratify=y, random_state=42)
 ### 7.4 Hyperparameter Tuning on Training Only
 
 **GridSearchCV uses only training data**:
+
 ```python
 grid = GridSearchCV(estimator=pipe, param_grid=grids[name], cv=5, scoring="accuracy")
 grid.fit(X_train, y_train)  # 5-fold CV on training set only
 ```
 
 **Benefits**:
+
 - Validation set untouched during tuning
 - Prevents overfitting to validation
 - Correct ML practice
@@ -2377,6 +2502,7 @@ grid.fit(X_train, y_train)  # 5-fold CV on training set only
 ### 7.5 Model Selection on Validation
 
 **Best model chosen by validation accuracy, not test**:
+
 ```python
 for name, pipe in final_candidates.items():
     pipe.fit(X_train, y_train)
@@ -2387,6 +2513,7 @@ for name, pipe in final_candidates.items():
 ```
 
 **Benefits**:
+
 - Test set remains unseen until final evaluation
 - No "peeking" at test performance
 - Honest generalization estimate
@@ -2394,6 +2521,7 @@ for name, pipe in final_candidates.items():
 ### 7.6 Final Evaluation on Test Once
 
 **Test set touched only once**:
+
 ```python
 best_pipe.fit(X_trainval, y_trainval)  # Refit on train+val
 pred_test = best_pipe.predict(X_test)  # Predict once!
@@ -2401,6 +2529,7 @@ test_acc = accuracy_score(y_test, pred_test)
 ```
 
 **Benefits**:
+
 - No iterative "tuning on test"
 - Test accuracy is true out-of-sample performance
 - Prevents overfitting to test
@@ -2408,16 +2537,19 @@ test_acc = accuracy_score(y_test, pred_test)
 ### 7.7 Both CV Methodologies
 
 **K-Independent Runs** (PDF requirement):
+
 - 10 independent train/test splits
 - Different random seed each time
 - Captures data randomness
 
 **K-Fold CV** (ML best practice):
+
 - Standard 10-fold cross-validation
 - Each fold is test once
 - Complementary to k-independent runs
 
 **Benefits**:
+
 - Both methods show ~73% accuracy
 - Confirms robustness
 - Satisfies both academic and industry standards
@@ -2425,6 +2557,7 @@ test_acc = accuracy_score(y_test, pred_test)
 ### 7.8 Clone for Independence
 
 **Uses `sklearn.base.clone()` in k-independent runs**:
+
 ```python
 for i in range(k):
     model_copy = clone(best_pipe)  # Fresh instance!
@@ -2433,6 +2566,7 @@ for i in range(k):
 ```
 
 **Benefits**:
+
 - Each run uses fresh model instance
 - Prevents refitting same object k times
 - Independence between runs
@@ -2440,12 +2574,14 @@ for i in range(k):
 ### 7.9 Class Imbalance Handling
 
 **All classifiers use `class_weight="balanced"`**:
+
 ```python
 LogisticRegression(class_weight="balanced")
 SVC(class_weight="balanced")
 ```
 
 **Benefits**:
+
 - Handles 40:60 imbalance automatically
 - Equivalent to reweighting samples
 - Prevents "always predict majority class"
@@ -2453,12 +2589,14 @@ SVC(class_weight="balanced")
 ### 7.10 Statistical Rigor
 
 **T-distribution for confidence intervals**:
+
 ```python
 t_crit = stats.t.ppf(0.975, df=9)  # k=10, df=9
 CI = mean ± t_crit * std / sqrt(k)
 ```
 
 **Benefits**:
+
 - More accurate for small samples (k=10)
 - Heavier tails than normal distribution
 - More conservative (wider CIs)
@@ -2520,6 +2658,7 @@ stackoverflow-survey-2025-analysis/
 ```
 
 **Total files**:
+
 - Python scripts: 5
 - Data files: 2 (CSV)
 - Documentation: 3 (CLAUDE.md, ARCHITECTURE.md, slides.md)
@@ -2536,11 +2675,13 @@ stackoverflow-survey-2025-analysis/
 **Example: Add new plausibility check in `preprocess_eur()`**
 
 1. Add constant at module level (after line 19):
+
 ```python
 MAX_COMPENSATION_EUR = 500000  # New upper bound for European salaries
 ```
 
 2. Add bounds check after line 71 (after existing plausibility checks):
+
 ```python
 # Existing code
 df = df[(df["WorkExp"] > 0) & (df["WorkExp"] <= MAX_WORK_EXPERIENCE_YEARS)]
@@ -2556,6 +2697,7 @@ print(f"  Dropped {dropped_comp} rows with CompTotal > {MAX_COMPENSATION_EUR}")
 3. Update output validation if needed (line 89)
 
 4. Test:
+
 ```bash
 python eda.py
 python regressione_lineare.py
@@ -2566,11 +2708,13 @@ python regressione_lineare.py
 **Example: Add Random Forest classifier**
 
 1. Import at top of `classification.py`:
+
 ```python
 from sklearn.ensemble import RandomForestClassifier
 ```
 
 2. Add to candidates dictionary (after line 167):
+
 ```python
 candidates = {
     "logistic": Pipeline([...]),
@@ -2585,6 +2729,7 @@ candidates = {
 ```
 
 3. (Optional) Add hyperparameter grid for tuning (after line 186):
+
 ```python
 grids = {
     "svm_linear": {"clf__C": [0.1, 1.0, 10.0]},
@@ -2602,6 +2747,7 @@ for name in ["svm_linear", "svm_poly", "svm_rbf", "random_forest"]:
 ```
 
 4. Test:
+
 ```bash
 python classification.py
 # Check console output for random_forest accuracy
@@ -2612,6 +2758,7 @@ python classification.py
 **Example: Expand SVM RBF grid to include different gamma values**
 
 1. Edit grids dictionary in `classification.py` (line 186):
+
 ```python
 grids = {
     "svm_linear": {"clf__C": [0.1, 1.0, 10.0]},
@@ -2624,6 +2771,7 @@ grids = {
 ```
 
 2. Test:
+
 ```bash
 python classification.py
 # Check best_params output for svm_rbf
@@ -2636,6 +2784,7 @@ python classification.py
 **Example: Add scatter plot of YearsCode vs WorkExp for classification EDA**
 
 1. Edit `eda.py` after existing classification plots (after line 128):
+
 ```python
 # NEW: Scatter plot YearsCode vs WorkExp
 fig, ax = plt.subplots(figsize=(9, 6), constrained_layout=True)
@@ -2649,6 +2798,7 @@ plt.close(fig)
 ```
 
 2. Test:
+
 ```bash
 python eda.py
 # Check plots_eda/aiaccbin/scatter_YearsCode_WorkExp.png
@@ -2659,6 +2809,7 @@ python eda.py
 **Example: Change classification split from 70/15/15 to 60/20/20**
 
 1. Edit constants in `classification.py` (lines 42-44):
+
 ```python
 TRAIN_SIZE = 0.60  # Changed from 0.70
 VAL_TEST_SIZE = 0.20  # Changed from 0.15
@@ -2666,6 +2817,7 @@ TEST_SIZE_FROM_TEMP = 0.50  # Unchanged (splits remaining 40% equally)
 ```
 
 2. Test:
+
 ```bash
 python classification.py
 # Check console output for split sizes
@@ -2702,6 +2854,7 @@ python eda.py && python classification.py && python regressione_lineare.py
 **Cause**: CSV file is missing expected column, or column name changed
 
 **Solution**:
+
 1. Check survey schema: `less survey_results_schema.csv`
 2. Verify column names in CSV: `head -n 1 survey_results_public.csv`
 3. If column renamed, update `required_cols` in `preprocessing.py`
@@ -2711,6 +2864,7 @@ python eda.py && python classification.py && python regressione_lineare.py
 **Cause**: Too strict filtering removed all rows
 
 **Solution**:
+
 1. Check preprocessing logs for which step dropped all rows
 2. Relax filters:
    - Increase `MAX_WORK_EXPERIENCE_YEARS` (e.g., 60 → 70)
@@ -2722,13 +2876,16 @@ python eda.py && python classification.py && python regressione_lineare.py
 **Cause**: Not enough RAM for hyperparameter tuning (especially with large grids)
 
 **Solution**:
+
 1. Reduce grid size (fewer C values, fewer degrees)
 2. Reduce training data size (subsample):
+
 ```python
 X_train_sub = X_train[:5000]
 y_train_sub = y_train[:5000]
 grid.fit(X_train_sub, y_train_sub)
 ```
+
 3. Use `n_jobs=1` instead of `n_jobs=-1` (less parallel, less memory)
 
 #### Error: `KeyError: 'AgeMapped'` in classification
@@ -2736,13 +2893,16 @@ grid.fit(X_train_sub, y_train_sub)
 **Cause**: Preprocessing didn't create `AgeMapped` column (mapping failed)
 
 **Solution**:
+
 1. Check that `AGE_MAP` in `utils.py` covers all age values in data
 2. Add print statement in `preprocess_aiaccbin()` after mapping:
+
 ```python
 df["AgeMapped"] = df["Age"].map(AGE_MAP)
 print(f"Unique ages: {df['Age'].unique()}")
 print(f"AgeMapped NaN count: {df['AgeMapped'].isna().sum()}")
 ```
+
 3. Update `AGE_MAP` with missing values
 
 #### Error: Plots not showing (headless environment)
@@ -2750,6 +2910,7 @@ print(f"AgeMapped NaN count: {df['AgeMapped'].isna().sum()}")
 **Cause**: No display available (SSH into server, Docker container)
 
 **Solution**:
+
 ```bash
 # Set matplotlib backend before running
 MPLBACKEND=Agg python eda.py
@@ -2762,6 +2923,7 @@ MPLBACKEND=Agg python regressione_lineare.py
 **Cause**: Model didn't converge in `LOGISTIC_MAX_ITER=1000` iterations
 
 **Solution**:
+
 1. Increase `LOGISTIC_MAX_ITER` (e.g., 1000 → 2000)
 2. Or increase `C` (less regularization)
 3. Or scale features (already done in pipeline)
@@ -2769,25 +2931,31 @@ MPLBACKEND=Agg python regressione_lineare.py
 ### 10.2 Memory Considerations
 
 **Dataset size**:
+
 - Raw CSV: 88 MB
 - Loaded in memory: ~200 MB (pandas overhead)
 - After preprocessing: ~50 MB (EUR subset)
 
 **Peak memory usage**:
+
 - EDA: ~500 MB
 - Classification: ~2 GB (GridSearchCV with 5-fold CV)
 - Regression: ~300 MB
 
 **Recommendations**:
+
 - Minimum: 4 GB RAM (tight)
 - Recommended: 8 GB RAM
 - Optimal: 16 GB RAM
 
 **Reducing memory**:
+
 1. Subsample data for development:
+
 ```python
 df = df.sample(n=10000, random_state=42)
 ```
+
 2. Use `low_memory=False` in `pd.read_csv()` (already done)
 3. Use `usecols` to load only needed columns (already done in `classification.py`)
 
@@ -2798,6 +2966,7 @@ df = df.sample(n=10000, random_state=42)
 **Diagnosis**: Check preprocessing logs for coercion count
 
 **Solutions**:
+
 - Accept data loss (current approach)
 - Impute missing values (median/mean)
 - Investigate source of non-numeric values
@@ -2807,11 +2976,13 @@ df = df.sample(n=10000, random_state=42)
 **Diagnosis**: 5,012 duplicates in classification (19% loss)
 
 **Possible causes**:
+
 - Survey allows multiple submissions from same person
 - Bots/spam responses
 - Copy-paste answers
 
 **Solutions**:
+
 - Accept deduplication (current approach)
 - Keep duplicates if they're legitimate (risky)
 - Add unique ID check instead of full row dedup
@@ -2821,11 +2992,13 @@ df = df.sample(n=10000, random_state=42)
 **Diagnosis**: R² = 0.038 (very weak relationship)
 
 **Explanation**:
+
 - WorkExp is weak predictor of salary
 - Many other factors: role, skills, company, location, negotiation
 - Not a data quality issue; genuine weak relationship
 
 **Solutions**:
+
 - Add more predictors (multiple regression)
 - Log-transform CompTotal (reduce skewness)
 - Segment by role/industry
@@ -2834,6 +3007,7 @@ df = df.sample(n=10000, random_state=42)
 ### 10.4 Debugging Tips
 
 **1. Add debug prints**:
+
 ```python
 # In preprocessing.py
 print(f"DEBUG: df shape before IQR: {df.shape}")
@@ -2842,6 +3016,7 @@ print(f"DEBUG: df shape after IQR: {df.shape}")
 ```
 
 **2. Inspect intermediate results**:
+
 ```python
 # In classification.py main()
 print(f"DEBUG: X_train shape: {X_train.shape}")
@@ -2849,16 +3024,19 @@ print(f"DEBUG: y_train value counts:\n{pd.Series(y_train).value_counts()}")
 ```
 
 **3. Use breakpoints (IDE)**:
+
 - Set breakpoint in PyCharm/VSCode
 - Inspect DataFrames, arrays, models interactively
 
 **4. Save intermediate data**:
+
 ```python
 # After preprocessing
 df.to_csv("debug_preprocessed.csv", index=False)
 ```
 
 **5. Check random seed reproducibility**:
+
 ```bash
 # Run twice, check if results identical
 python classification.py > run1.log 2>&1
@@ -2877,6 +3055,7 @@ Based on code quality review (Score: 87/100), here are optional improvements:
 **Current**: 8 minor PEP 8 violations (cosmetic only)
 
 **Fix**:
+
 ```bash
 # Auto-fix style issues
 autopep8 -i --select=E,W classification.py utils.py preprocessing.py eda.py regressione_lineare.py
@@ -2892,6 +3071,7 @@ flake8 *.py
 **Current**: Statistical calculation duplicated in classification.py (lines 250-272, 278-300)
 
 **Refactor**: Extract helper function
+
 ```python
 def compute_stats_with_ci(scores: np.ndarray, confidence: float = 0.975) -> dict:
     """Compute descriptive stats and t-distribution CI for scores."""
@@ -2935,6 +3115,7 @@ cv_stats = compute_stats_with_ci(cv_scores)
 **Enhancement**: 4-class classification (Highly trust, Somewhat trust, Somewhat distrust, Highly distrust)
 
 **Code changes**:
+
 ```python
 # preprocessing.py
 def preprocess_aiaccbin_multiclass(df):
@@ -2962,6 +3143,7 @@ def preprocess_aiaccbin_multiclass(df):
 **Enhancement**: Add more predictors (YearsCode, EdLevelOrd, Country)
 
 **Code changes**:
+
 ```python
 # regressione_lineare.py
 X = data[["WorkExp", "YearsCode", "EdLevelOrd"]].values  # Multiple features
@@ -2984,6 +3166,7 @@ for i, col in enumerate(["WorkExp", "YearsCode", "EdLevelOrd"]):
 **Enhancement**: Report which features matter most in classification
 
 **Code changes**:
+
 ```python
 # classification.py (after fitting best model)
 if hasattr(best_pipe.named_steps["clf"], "coef_"):
@@ -3004,6 +3187,7 @@ if hasattr(best_pipe.named_steps["clf"], "coef_"):
 **Enhancement**: Save trained model to disk
 
 **Code changes**:
+
 ```python
 import joblib
 
@@ -3024,6 +3208,7 @@ predictions = loaded_model.predict(X_new)
 **Enhancement**: Report 95% CI for coefficients using statsmodels
 
 **Code changes**:
+
 ```python
 import statsmodels.api as sm
 
@@ -3041,6 +3226,7 @@ print(results.summary())  # Includes CIs for coefficients
 **Current**: Static PNG plots
 
 **Enhancements**:
+
 1. **Interactive plots**: Use Plotly instead of Matplotlib
 2. **Feature correlation heatmap**: Add to classification EDA
 3. **Learning curves**: Plot training/validation accuracy vs. training size
@@ -3052,12 +3238,14 @@ print(results.summary())  # Includes CIs for coefficients
 **Current**: No unit tests
 
 **Enhancements**:
+
 1. **Unit tests**: Test preprocessing functions with known inputs
 2. **Integration tests**: Test full workflow end-to-end
 3. **GitHub Actions**: Auto-run tests on commit
 4. **Code coverage**: Measure test coverage with pytest-cov
 
 **Example unit test**:
+
 ```python
 # test_preprocessing.py
 import pandas as pd
@@ -3093,8 +3281,7 @@ This ARCHITECTURE.md provides comprehensive onboarding documentation for the Sta
 6. **Comprehensive documentation**: 1,400+ lines of architecture docs, 190 lines of CLAUDE.md
 
 For quick start, run:
+
 ```bash
 python eda.py && python classification.py && python regressione_lineare.py
 ```
-
-For questions, consult this document or CLAUDE.md. Happy coding!
